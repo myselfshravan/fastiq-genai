@@ -553,7 +553,10 @@ function AIResponse({ response }) {
     '<h3 class="text-base md:text-xl font-bold mt-10">'
   );
   // Add classes to <p> tags
-  htmlContent = htmlContent.replace(/<p>/g, '<p class="my-4 text-sm md:text-lg">');
+  htmlContent = htmlContent.replace(
+    /<p>/g,
+    '<p class="my-4 text-sm md:text-lg">'
+  );
   htmlContent = htmlContent.replace(
     /<strong>/g,
     '<strong class="font-bold mt-10">'

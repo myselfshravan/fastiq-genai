@@ -59,7 +59,7 @@ function ApiKeyEditor({
     <div className="flex items-center justify-between flex-col md:flex-row">
       <label
         htmlFor={`${label.toLowerCase()}API`}
-        className="block text-sm font-medium text-gray-700 mb-2 md:mr-2"
+        className="block text-sm font-semibold text-gray-700 mb-2 md:mr-2"
       >
         {label} API Key:
       </label>
@@ -199,9 +199,9 @@ const Profile = () => {
   }, []);
 
   return (
-    <div className="bg-white">
+    <div className="bg-white h-screen">
       <Header />
-      <div className="mt-10 flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <h1 className="text-4xl font-bold text-gray-800 mb-10 pt-14">
           Profile
         </h1>
