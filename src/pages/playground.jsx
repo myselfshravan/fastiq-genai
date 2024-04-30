@@ -31,6 +31,7 @@ import Loading from "../components/Loading";
 import LoadingSmall from "../components/LoadingSmall";
 import Header from "../components/Header";
 import showdown from "showdown";
+import { WindupChildren } from "windups";
 
 const oldtemplates = {
   "form-19": `
@@ -379,7 +380,6 @@ const TEMPLATES = {
   "form-1": {
     title: "Answer the following question",
     instructions: ["Question:", "{questiontext}"],
-    joiner: "---",
   },
   "form-2": {
     title: "Provide the Text to Correct the Grammar",
@@ -388,7 +388,6 @@ const TEMPLATES = {
       "{incorrecttext}",
       "Instruction: Provide the corrected text for the original text provided above.",
     ],
-    joiner: "---",
   },
   "form-3": {
     title: "Write a detailed assessment of a candidate",
@@ -397,9 +396,8 @@ const TEMPLATES = {
       "{resumetext}",
       "Job Description:",
       "{jdtext}",
-      "Instruction: Using the different pieces of context above, create an assessment that takes into account all the pieces of information provided above and analyzes them together in an appropriate manner to produce a reliable assessment for the recruiter to take concerete next steps. The recruiter should be able to take the assessment provided by you and make a decision to either engage the candidate further or not. Don't leave the recruiter confused with your assessment.",
+      "Instruction: Using the different pieces of context above, create an assessment for the recruiter.",
     ],
-    joiner: "---",
   },
   "form-4": {
     title: "Write a detailed job description",
@@ -407,9 +405,58 @@ const TEMPLATES = {
       "Target role for which you need to generate a job description:",
       "{resumetext}",
     ],
-    joiner: "---",
   },
 };
+
+const NEW_TEMPLATES = [
+  {
+    id: "form-1",
+    name: "Plain Text",
+    title: "Answer the following question",
+    instructions: ["Question:", "{questiontext}"],
+  },
+  {
+    id: "form-2",
+    name: "Grammatical Standard English",
+    title: "Provide the Text to Correct the Grammar",
+    instructions: [
+      "Original Text:",
+      "{incorrecttext}",
+      "Instruction: Provide the corrected text for the original text provided above.",
+    ],
+  },
+  {
+    id: "form-3",
+    name: "Assisment for Recruitment",
+    title: "Write a detailed assessment of a candidate",
+    instructions: [
+      "The LinkedIn bio or resume details of the candidate:",
+      "{resumetext}",
+      "Job Description:",
+      "{jdtext}",
+      "Instruction: Using the different pieces of context above, create an assessment for the recruiter.",
+    ],
+  },
+  {
+    id: "form-4",
+    name: "Job Description Generator",
+    title: "Write a detailed job description",
+    instructions: [
+      "Target role for which you need to generate a job description:",
+      "{resumetext}",
+    ],
+  },
+  {
+    id: "form-5",
+    name: "Joke Generator",
+    title: "Generate a Joke",
+    instructions: [
+      "Generate a joke that will make the reader laugh.",
+      "{joketopic}",
+      "Generate a joke based on the above topic.",
+    ],
+  },
+];
 
 function SideBar({
   activeForm,
@@ -420,9 +467,9 @@ function SideBar({
   handleModelChange,
 }) {
   return (
-    <div className="w-full md:w-1/4 p-6 space-y-4 overflow-auto shadow-lg rounded-lg bg-gradient-to-b from-blue-200 to-blue-100">
+    <div className="w-full md:w-1/4 p-6 space-y-4 overflow-auto shadow-lg bg-gradient-to-b from-blue-200 to-blue-100">
       <div>
-        <div className="mt-8">
+        <div className="mt-2 md:mt-8">
           <label
             htmlFor="provider-select"
             className="text-md font-semibold text-gray-700"
@@ -466,15 +513,15 @@ function SideBar({
       </div>
       <h2 className="text-2xl font-bold">Forms</h2>
       <ul className="space-y-2">
-        {Object.keys(TEMPLATES).map((form, index) => (
-          <li key={form}>
+        {NEW_TEMPLATES.map((form) => (
+          <li key={form.id}>
             <button
               className={`w-full p-2 rounded-lg text-left bg-blue-100 border border-white ${
-                activeForm === form ? "bg-blue-500 text-white" : ""
+                activeForm === form.id ? "bg-blue-500 text-white" : ""
               }`}
-              onClick={() => handleFormChange(form)}
+              onClick={() => handleFormChange(form.id)}
             >
-              {TEMPLATES[form].title}
+              {form.name}
             </button>
             <p className="text-sm text-gray-500"></p>
           </li>
@@ -490,10 +537,10 @@ function FormField({
   handleInputChange,
   handleFormSubmit,
 }) {
-  const formTemplate = TEMPLATES[activeForm];
+  const formTemplate = NEW_TEMPLATES.find((form) => form.id === activeForm);
 
   return (
-    <div className="p-6 shadow-lg rounded-lg bg-white">
+    <div className="p-6 bg-white border-2 ">
       <h2 className="text-2xl font-bold mb-4">{formTemplate.title}</h2>
       <form onSubmit={handleFormSubmit}>
         {formTemplate.instructions.map((item, index) => {
@@ -511,7 +558,7 @@ function FormField({
             );
           }
           return (
-            <p key={index} className="text-lg mt-4">
+            <p key={index} className="text-base mt-4 md:text-lg">
               {item.replace(/\{(\w+)\}/, "")}
             </p>
           );
@@ -530,8 +577,8 @@ function FormField({
 function AIResponse({ response }) {
   const converter = new showdown.Converter();
   let htmlContent = converter.makeHtml(response);
-  console.log(response);
-  console.log(htmlContent);
+  // console.log(response);
+  // console.log(htmlContent);
   htmlContent = htmlContent.replace(
     /<(\w+)(\s+[^>]*)? id="[^"]*"([^>]*)>/g,
     "<$1$2$3>"
@@ -610,6 +657,7 @@ function Playground() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [smallloading, setSmallLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState({
     grok: "",
     openai: "",
@@ -680,7 +728,7 @@ function Playground() {
     modelProvider,
     modelName
   ) => {
-    setLoading(true);
+    setSmallLoading(true);
     const endpoint = getEndpoint(modelProvider);
 
     const body = JSON.stringify({
@@ -713,7 +761,7 @@ function Playground() {
       console.error("Error:", error);
       setApiResponse("Error fetching response");
     } finally {
-      setLoading(false);
+      setSmallLoading(false);
     }
   };
 
@@ -729,7 +777,7 @@ function Playground() {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    const formTemplate = TEMPLATES[activeForm];
+    const formTemplate = NEW_TEMPLATES.find((form) => form.id === activeForm);
     const formInputs = Object.fromEntries(new FormData(event.target));
     const filledTemplate = fillTemplate(
       formTemplate.instructions.join("\n---\n"),
@@ -753,44 +801,70 @@ function Playground() {
   return (
     <div className="bg-white">
       <Header />
-      {user ? (
-        <div className="container">
-          <UserProfile userData={userData} />
-          <div className="flex flex-col md:flex-row">
-            <SideBar
-              activeForm={activeForm}
-              handleFormChange={setActiveForm}
-              selectedProvider={selectedProvider}
-              handleProviderChange={handleProviderChange}
-              selectedModel={selectedModel}
-              handleModelChange={handleModelChange}
-              modelProviders={MODEL_PROVIDERS}
-            />
-            <div className="flex h-screen flex-col md:w-3/4 w-full">
-              <FormField
+      <div className="flex flex-col items-center">
+        <ToastContainer
+          position="top-center"
+          autoClose="5000"
+          theme="light"
+          transition:Bounce
+        />
+        {loading ? (
+          <Loading />
+        ) : user ? (
+          <div className="container">
+            {/* <UserProfile userData={userData} /> */}
+            <div className="flex flex-col md:flex-row">
+              <SideBar
                 activeForm={activeForm}
-                formInputs={{}}
-                handleInputChange={() => {}}
-                handleFormSubmit={handleFormSubmit}
-                templates={TEMPLATES}
+                handleFormChange={setActiveForm}
+                selectedProvider={selectedProvider}
+                handleProviderChange={handleProviderChange}
+                selectedModel={selectedModel}
+                handleModelChange={handleModelChange}
+                modelProviders={MODEL_PROVIDERS}
               />
-              <div className="w-full md:p-6">
-                {loading ? (
-                  <div className="mt-4">
-                    <LoadingSmall />
-                  </div>
-                ) : (
-                  <div>
-                    <AIResponse response={apiResponse} />
-                  </div>
-                )}
+              <div className="flex h-screen flex-col md:w-3/4 w-full">
+                <FormField
+                  activeForm={activeForm}
+                  formInputs={{}}
+                  handleInputChange={() => {}}
+                  handleFormSubmit={handleFormSubmit}
+                  templates={NEW_TEMPLATES}
+                />
+                <div className="w-full md:p-6">
+                  {smallloading ? (
+                    <div className="mt-4">
+                      <LoadingSmall />
+                    </div>
+                  ) : (
+                    <div>
+                      <AIResponse response={apiResponse} />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <Loading />
-      )}
+        ) : (
+          <div>
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow"
+              role="alert"
+            >
+              <strong className="font-bold">Oops! </strong>
+              <span className="block sm:inline">
+                Please sign in to use the playground.
+              </span>
+            </div>
+            <a
+              href="/"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md inline-flex items-center mt-10"
+            >
+              Home
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
