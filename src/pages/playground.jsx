@@ -413,16 +413,27 @@ const NEW_TEMPLATES = [
     id: "form-1",
     name: "Plain Text",
     title: "Answer the following question",
-    instructions: ["Question:", "{questiontext}"],
+    systemPrompt: "You will answer in spanish.",
+    instructions: ["User Prompt:", "{questiontext}", " "],
+  },
+  {
+    id: "form-6",
+    name: "gpt2 chatbot",
+    title: "Chat with the AI",
+    systemPrompt:
+      "You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.",
+    instructions: ["User Prompt:", "{questiontext}", " "],
   },
   {
     id: "form-2",
     name: "Grammatical Standard English",
     title: "Provide the Text to Correct the Grammar",
+    systemPrompt:
+      "Your task is to take the text provided and rewrite it into a clear, grammatically correct version while preserving the original meaning as closely as possible. Correct any punctuation errors, verb tense issues, word choice problems, and other grammatical mistakes.",
     instructions: [
-      "Original Text:",
+      "Task Description: Text/Sentence Rephrasing for Enhanced Fluency and Grammar. Original Sentence/Text:",
       "{incorrecttext}",
-      "Instruction: Provide the corrected text for the original text provided above.",
+      "Objective: Please rephrase the above sentence/text to improve its fluency, readability, and grammatical accuracy. The revised version should maintain the original meaning but be expressed in a clearer and more polished and cassual manner.",
     ],
   },
   {
@@ -444,6 +455,7 @@ const NEW_TEMPLATES = [
     instructions: [
       "Target role for which you need to generate a job description:",
       "{resumetext}",
+      " ",
     ],
   },
   {
@@ -632,9 +644,9 @@ function AIResponse({ response }) {
   );
 
   return (
-    <div className="w-full p-6 shadow-lg rounded-lg bg-white">
+    <div className="w-full p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">AI Response</h2>
-      <div className="text-left mx-auto p-6 shadow-lg rounded-lg bg-white">
+      <div className="text-left mx-auto p-6 br-sh rounded-lg bg-white">
         <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
       </div>
     </div>
@@ -659,15 +671,13 @@ function Playground() {
   const [loading, setLoading] = useState(true);
   const [smallloading, setSmallLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState({
-    grok: "",
+    groq: "",
     openai: "",
     anyscale: "",
     togetherai: "",
   });
-  const [selectedProvider, setSelectedProvider] = useState("Anyscale");
-  const [selectedModel, setSelectedModel] = useState(
-    "meta-llama/Llama-2-7b-chat-hf"
-  );
+  const [selectedProvider, setSelectedProvider] = useState("Groq");
+  const [selectedModel, setSelectedModel] = useState("llama3-70b-8192");
   const [activeForm, setActiveForm] = useState("form-1");
   const [apiResponse, setApiResponse] = useState("");
 
@@ -681,7 +691,7 @@ function Playground() {
           const userData = docSnap.data();
           setUserData(userData);
           setApiKeys({
-            grok: userData.grokapi || "",
+            groq: userData.groqapi || "",
             openai: userData.openaiapi || "",
             anyscale: userData.anyscaleapi || "",
             togetherai: userData.togetheraiapi || "",
@@ -721,9 +731,8 @@ function Playground() {
   };
 
   const makeApiCall = async (
+    selectSystemPrompt,
     dataString,
-    setApiResponse,
-    setLoading,
     apiKey,
     modelProvider,
     modelName
@@ -736,8 +745,7 @@ function Playground() {
       messages: [
         {
           role: "system",
-          content:
-            "You are a helpful AI assistant. Respond with suitable markdown format.",
+          content: selectSystemPrompt,
         },
         { role: "user", content: dataString },
       ],
@@ -778,24 +786,27 @@ function Playground() {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     const formTemplate = NEW_TEMPLATES.find((form) => form.id === activeForm);
+    if (!formTemplate) {
+      console.error("Form template not found for the active form.");
+      return;
+    }
+
     const formInputs = Object.fromEntries(new FormData(event.target));
     const filledTemplate = fillTemplate(
       formTemplate.instructions.join("\n---\n"),
       formInputs
     );
-    console.log(filledTemplate);
     const apiKey = apiKeys[selectedProvider.toLowerCase()];
     const modelName = selectedModel;
-    console.log(modelName);
     const modelProvider = selectedProvider;
-    makeApiCall(
-      filledTemplate,
-      setApiResponse,
-      setLoading,
-      apiKey,
-      modelProvider,
-      modelName
-    );
+    let systemPrompt = "You are a helpful AI assistant.";
+    if (formTemplate.systemPrompt) {
+      systemPrompt += ` ${formTemplate.systemPrompt}`;
+    }
+    console.log("User Prompt: ", filledTemplate);
+    console.log("Selected Model: ", modelName);
+    console.log("System Prompt: ", systemPrompt);
+    makeApiCall(systemPrompt, filledTemplate, apiKey, modelProvider, modelName);
   };
 
   return (

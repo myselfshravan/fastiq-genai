@@ -35,7 +35,7 @@ const dummy_user = {
   displayName: "Shravan",
   email: "shravanrevanna158@gmail.com",
   phoneNumber: "1234567890",
-  grokapi: "123456789",
+  groqapi: "123456789",
   openaiapi: "123456789",
   anyscaleapi: "123456789",
   togetheraiapi: "123456789",
@@ -137,13 +137,13 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [apiKeys, setApiKeys] = useState({
-    grok: "",
+    groq: "",
     openai: "",
     anyscale: "",
     togetherai: "",
   });
   const [isEditing, setIsEditing] = useState({
-    grok: false,
+    groq: false,
     openai: false,
     anyscale: false,
     togetherai: false,
@@ -181,7 +181,7 @@ const Profile = () => {
           const userData = userSnapshot.data();
           setUserData(userData);
           setApiKeys({
-            grok: userData.grokapi || "",
+            groq: userData.groqapi || "",
             openai: userData.openaiapi || "",
             anyscale: userData.anyscaleapi || "",
             togetherai: userData.togetheraiapi || "",
