@@ -29,6 +29,7 @@ import { set } from "firebase/database";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
+import showdown from "showdown";
 
 const dummyuserData = {
   uid: "123456789",
@@ -93,6 +94,70 @@ const groupByDate = (responses) => {
   }, {});
 };
 
+function AIResponse({ response }) {
+  const converter = new showdown.Converter();
+  let htmlContent = converter.makeHtml(response);
+  htmlContent = htmlContent.replace(
+    /<(\w+)(\s+[^>]*)? id="[^"]*"([^>]*)>/g,
+    "<$1$2$3>"
+  );
+  htmlContent = htmlContent.replace(
+    /<(\w+)(\s+[^>]*)? id='[^']*'([^>]*)>/g,
+    "<$1$2$3>"
+  );
+  htmlContent = htmlContent.replace(
+    /<h1>/g,
+    '<h1 class="text-xl md:text-3xl font-bold mt-10">'
+  );
+  htmlContent = htmlContent.replace(
+    /<h2>/g,
+    '<h2 class="text-lg md:text-2xl font-bold mt-10">'
+  );
+  htmlContent = htmlContent.replace(
+    /<h3>/g,
+    '<h3 class="text-base md:text-xl font-bold mt-10">'
+  );
+  // Add classes to <p> tags
+  htmlContent = htmlContent.replace(
+    /<p>/g,
+    '<p class="my-4 text-sm md:text-lg">'
+  );
+  htmlContent = htmlContent.replace(
+    /<strong>/g,
+    '<strong class="font-bold mt-10">'
+  );
+  htmlContent = htmlContent.replace(
+    /<ul>/g,
+    '<ul class="list-disc pl-5 space-y-2 mb-4">'
+  );
+  htmlContent = htmlContent.replace(
+    /<ol>/g,
+    '<ol class="list-disc pl-5 space-y-2">'
+  );
+  htmlContent = htmlContent.replace(/<li>/g, '<li class="text-sm md:text-lg">');
+  htmlContent = htmlContent.replace(
+    /<hr \/>/g,
+    '<hr class="my-8 border-t border-gray-300"/>'
+  );
+  // Add classes to <pre> tags
+  htmlContent = htmlContent.replace(
+    /<pre>/g,
+    '<pre class="p-4 bg-gray-100 rounded-lg overflow-x-auto font-mono text-sm leading-normal">'
+  );
+  htmlContent = htmlContent.replace(
+    /<code>/g,
+    '<code class="language-python">'
+  );
+
+  return (
+    <div className="w-full bg-white">
+      <div className="text-left mx-auto p-6 br-sh rounded-lg bg-white">
+        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      </div>
+    </div>
+  );
+}
+
 function Responses({ userData }) {
   if (!userData || !userData.airesponses) {
     return (
@@ -118,19 +183,18 @@ function Responses({ userData }) {
             >
               <div className="flex items-center justify-between w-full">
                 <p className="text-lg font-semibold text-gray-800">
-                  {response.userPrompt}
+                  {response.title}
                 </p>
                 <p className="text-sm text-gray-400">
                   {formatTime(response.timestamp.seconds)}
                 </p>
-                <p className="text-sm text-gray-400">
-                  {response.selectedModel}
-                </p>
               </div>
+              <p className="text-sm text-gray-400">{response.selectedModel}</p>
               <div className="flex items-center justify-between w-full mt-2 flex-col">
-                <p className="text-sm text-gray-600">
+                {/* <p className="text-sm text-gray-600">
                   AI Response: {response.aiResponse}
-                </p>
+                </p> */}
+                <AIResponse response={response.aiResponse} />
               </div>
             </div>
           ))}
