@@ -23,6 +23,7 @@ import {
   query,
   where,
   getDocs,
+  arrayUnion,
 } from "firebase/firestore/lite";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { set } from "firebase/database";
@@ -31,7 +32,7 @@ import Loading from "../components/Loading";
 import LoadingSmall from "../components/LoadingSmall";
 import Header from "../components/Header";
 import showdown from "showdown";
-import { WindupChildren } from "windups";
+import GPT4Tokenizer from "gpt4-tokenizer";
 
 const oldtemplates = {
   "form-19": `
@@ -437,6 +438,18 @@ const NEW_TEMPLATES = [
     ],
   },
   {
+    id: "form-7",
+    name: "Youtube Summary",
+    title: "Summarize a Youtube Video",
+    systemPrompt:
+      "Your task is to summarize the key points from the transcript in user context, focusing on the main themes. The summary should be concise, clear, and in simple language. Ensure that it captures the essential information necessary to understand the video's content without needing to watch it.",
+    instructions: [
+      "Summarize the below transcript by identifying and listing the essential points and critical details. Ensure the summary is straightforward, using simple terms, and focuses only on the central themes. The goal is to capture the core information succinctly, enabling understanding of the video's main content.",
+      "{videtranscript}",
+      " ",
+    ],
+  },
+  {
     id: "form-3",
     name: "Assisment for Recruitment",
     title: "Write a detailed assessment of a candidate",
@@ -548,6 +561,8 @@ function FormField({
   formInputs,
   handleInputChange,
   handleFormSubmit,
+  characterCount,
+  tokenCount,
 }) {
   const formTemplate = NEW_TEMPLATES.find((form) => form.id === activeForm);
 
@@ -575,6 +590,8 @@ function FormField({
             </p>
           );
         })}
+        <p>Character count: {characterCount}</p>
+        <p>Token count: {tokenCount}</p>
         <button
           className="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           type="submit"
@@ -680,6 +697,19 @@ function Playground() {
   const [selectedModel, setSelectedModel] = useState("llama3-70b-8192");
   const [activeForm, setActiveForm] = useState("form-1");
   const [apiResponse, setApiResponse] = useState("");
+  const [characterCount, setCharacterCount] = useState(0);
+  const [tokenCount, setTokenCount] = useState(0);
+  const [inputprompt, setInputPrompt] = useState("");
+  const [titletosave, setTitleToSave] = useState("");
+  const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+
+  const handleInputChange = (event) => {
+    setCharacterCount(event.target.value.length);
+    const text = event.target.value;
+    setInputPrompt(text);
+    const estimatedTokenCount = tokenizer.estimateTokenCount(text);
+    setTokenCount(estimatedTokenCount);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -809,6 +839,22 @@ function Playground() {
     makeApiCall(systemPrompt, filledTemplate, apiKey, modelProvider, modelName);
   };
 
+  const handleSaveResponse = async () => {
+    const timestamp = new Date();
+    const responseObj = {
+      selectedModel,
+      title: titletosave,
+      userPrompt: inputprompt,
+      aiResponse: apiResponse,
+      timestamp,
+    };
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, {
+      airesponses: arrayUnion(responseObj),
+    });
+    toast.success("Response saved successfully!");
+  };
+
   return (
     <div className="bg-white">
       <Header />
@@ -838,9 +884,11 @@ function Playground() {
                 <FormField
                   activeForm={activeForm}
                   formInputs={{}}
-                  handleInputChange={() => {}}
+                  handleInputChange={handleInputChange}
                   handleFormSubmit={handleFormSubmit}
                   templates={NEW_TEMPLATES}
+                  characterCount={characterCount}
+                  tokenCount={tokenCount}
                 />
                 <div className="w-full md:p-6">
                   {smallloading ? (
@@ -848,9 +896,31 @@ function Playground() {
                       <LoadingSmall />
                     </div>
                   ) : (
-                    <div>
-                      <AIResponse response={apiResponse} />
-                    </div>
+                    <>
+                      {apiResponse ? (
+                        <div className="flex flex-col justify-center items-center">
+                          <AIResponse response={apiResponse} />
+                          <input
+                            type="text"
+                            value={titletosave}
+                            onChange={(e) => setTitleToSave(e.target.value)}
+                            placeholder="Title to save the response"
+                            className="mt-4 block border-2 border-gray-300 rounded-lg py-2 px-1 focus:ring-blue-500 focus:border-blue-500 max-w-56"
+                          />
+
+                          <button
+                            onClick={handleSaveResponse}
+                            className="mt-2 mb-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                          >
+                            Save Response
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="mt-4 text-gray-500">
+                          No response yet. Please submit a query.
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

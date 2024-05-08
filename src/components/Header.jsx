@@ -10,6 +10,7 @@ function Header() {
   const navigation = [
     // { name: "Profile", href: "profile" },
     { name: "Playground", href: "playground"},
+    { name: "History", href: "history" },
     { name: "API Key", href: "#" },
     { name: "Store", href: "#" },
     { name: "About", href: "#" },
