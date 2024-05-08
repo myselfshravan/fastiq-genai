@@ -24,12 +24,18 @@ function App() {
               ... is a platform that allows you to create and manage your own AI
             </p>
 
-            <div className="mt-10 flex items-center justify-center">
+            <div className="mt-10 flex items-center justify-center gap-3">
               <a
                 href="playground"
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Playground
+              </a>
+              <a
+                href="history"
+                className="rounded-md bg-gray-200 px-3.5 py-2.5 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                History
               </a>
             </div>
             <Login />
