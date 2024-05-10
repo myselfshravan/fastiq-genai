@@ -12,7 +12,7 @@ function Header() {
     { name: "Playground", href: "playground"},
     { name: "History", href: "history" },
     { name: "API Key", href: "#" },
-    { name: "Store", href: "#" },
+    { name: "Store", href: "store" },
     { name: "About", href: "#" },
   ];
 

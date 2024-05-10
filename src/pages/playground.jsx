@@ -435,6 +435,7 @@ const NEW_TEMPLATES = [
       "Task Description: Text/Sentence Rephrasing for Enhanced Fluency and Grammar. Original Sentence/Text:",
       "{incorrecttext}",
       "Objective: Please rephrase the above sentence/text to improve its fluency, readability, and grammatical accuracy. The revised version should maintain the original meaning but be expressed in a clearer and more polished and cassual manner.",
+      "{additional instructions}",
     ],
   },
   {
@@ -860,19 +861,38 @@ function Playground() {
   };
 
   const handleSaveResponse = async () => {
-    const timestamp = new Date();
-    const responseObj = {
-      selectedModel,
-      title: titletosave,
-      userPrompt: inputprompt,
-      aiResponse: apiResponse,
-      timestamp,
-    };
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      airesponses: arrayUnion(responseObj),
-    });
-    toast.success("Response saved successfully!");
+    if (
+      !selectedModel ||
+      !titletosave ||
+      !inputprompt ||
+      !apiResponse ||
+      !user?.uid
+    ) {
+      toast.error("Missing information, unable to save the response.");
+      return;
+    }
+
+    try {
+      const timestamp = new Date();
+      const responseObj = {
+        selectedModel,
+        title: titletosave,
+        userPrompt: inputprompt,
+        aiResponse: apiResponse,
+        timestamp,
+      };
+      const userRef = doc(db, "users", user.uid);
+
+      await updateDoc(userRef, {
+        airesponses: arrayUnion(responseObj),
+      });
+      toast.success("Response saved successfully!");
+    } catch (error) {
+      console.error("Failed to save the response: ", error);
+      toast.error("Error saving response. Please try again.");
+    } finally {
+      setTitleToSave("");
+    }
   };
 
   return (

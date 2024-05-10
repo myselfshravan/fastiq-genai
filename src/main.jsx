@@ -9,6 +9,7 @@ import Profile from "./pages/profile";
 import Events from "./pages/events";
 import Playground from "./pages/playground.jsx";
 import History from "./pages/history";
+import Store from "./pages/store";
 
 function Apps() {
   return (
@@ -19,6 +20,7 @@ function Apps() {
         <Route path="events" element={<Events />} />
         <Route path="playground" element={<Playground />} />
         <Route path="history" element={<History />} />
+        <Route path="store" element={<Store />} />
       </Routes>
     </BrowserRouter>
   );

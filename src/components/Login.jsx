@@ -16,6 +16,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import "firebase/compat/auth";
 import { Dialog, Transition } from "@headlessui/react";
@@ -84,9 +86,50 @@ function GoogleSignInButton({ onLogin }) {
           d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
         ></path>
       </svg>
-      Sign up with Google
+      Sign in with Google
       <div></div>
     </button>
+  );
+}
+
+function EmailSignInForm({ onLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      onLogin();
+    } catch (error) {
+      console.error("Email sign-in error:", error);
+      toast.error(`Error during email sign-in: ${error.message}`);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSignIn} className="flex flex-col items-center gap-y-2">
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md"
+      />
+      <button
+        type="submit"
+        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+      >
+        Sign In
+      </button>
+    </form>
   );
 }
 
@@ -128,13 +171,16 @@ export function Login() {
   return (
     <div>
       <ToastContainer />
-      <div className="mt-10 flex items-center justify-center gap-x-6">
+      <div className="mt-10 flex flex-col items-center justify-center gap-y-6">
         {isLoading ? (
           <LoadingButton />
         ) : user ? (
           <UserProfile user={user} />
         ) : (
-          <GoogleSignInButton onLogin={handleGoogleLogin} />
+          <>
+            <GoogleSignInButton onLogin={handleGoogleLogin} />
+            <EmailSignInForm onLogin={() => setUser(auth.currentUser)} />
+          </>
         )}
       </div>
     </div>
