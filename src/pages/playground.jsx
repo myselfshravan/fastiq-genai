@@ -435,7 +435,8 @@ const NEW_TEMPLATES = [
       "Task Description: Text/Sentence Rephrasing for Enhanced Fluency and Grammar. Original Sentence/Text:",
       "{incorrecttext}",
       "Objective: Please rephrase the above sentence/text to improve its fluency, readability, and grammatical accuracy. The revised version should maintain the original meaning but be expressed in a clearer and more polished and cassual manner.",
-      "{additional instructions}",
+      "Additional context: ",
+      "{additional}",
     ],
   },
   {
@@ -601,18 +602,20 @@ function FormField({
                 value={formInputs[key]}
                 onChange={handleInputChange}
                 className="mt-2 block w-full border-2 border-gray-300 rounded-lg p-4 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={item.replace(/\{(\w+)\}/, "Enter here")}
+                placeholder={item.replace(/\{(\w+)\}/, "Enter Context here")}
               />
             );
           }
           return (
-            <p key={index} className="text-base mt-4 md:text-lg">
+            <p key={index} className="text-base mt-4 md:text-lg text-left">
               {item.replace(/\{(\w+)\}/, "")}
             </p>
           );
         })}
-        <p>Character count: {characterCount}</p>
-        <p>Token count: {tokenCount}</p>
+        <p className="mt-4 text-md font-semibold">
+          Character count: {characterCount}
+        </p>
+        <p className="text-md font-semibold">Token count: {tokenCount}</p>
         <button
           className="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           type="submit"
