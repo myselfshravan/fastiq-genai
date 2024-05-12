@@ -13,7 +13,7 @@ function Header() {
     { name: "History", href: "history" },
     { name: "API Key", href: "#" },
     { name: "Store", href: "store" },
-    { name: "About", href: "#" },
+    { name: "About", href: "about" },
   ];
 
   return (
@@ -71,7 +71,7 @@ function Header() {
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <img
-                className="h-16 w-auto"
+                className="h-12 w-auto rounded-lg"
                 src="https://github.com/githubhosting/ds/assets/71520844/9f82d110-1271-4bb3-8ceb-0e4b6ec8cce7"
                 alt="Logo"
               />

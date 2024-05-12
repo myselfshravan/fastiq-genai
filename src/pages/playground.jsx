@@ -414,7 +414,8 @@ const NEW_TEMPLATES = [
     id: "form-1",
     name: "Plain Text",
     title: "Answer the following question",
-    systemPrompt: "You will answer in spanish.",
+    systemPrompt:
+      "You are an expert in the field and have been asked to provide a detailed and comprehensive answer to the user's query. Your response should be well-structured, informative, and provide a thorough explanation of the topic.",
     instructions: ["User Prompt:", "{questiontext}", " "],
   },
   {
@@ -584,7 +585,7 @@ function FormField({
   handleInputChange,
   handleFormSubmit,
   characterCount,
-  tokenCount,
+  inputPrompt,
 }) {
   const formTemplate = NEW_TEMPLATES.find((form) => form.id === activeForm);
 
@@ -615,7 +616,7 @@ function FormField({
         <p className="mt-4 text-md font-semibold">
           Character count: {characterCount}
         </p>
-        <p className="text-md font-semibold">Token count: {tokenCount}</p>
+        {/* <p className="text-md font-semibold">Token count: {tokenCount}</p> */}
         <button
           className="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           type="submit"
@@ -694,6 +695,39 @@ function AIResponse({ response }) {
   );
 }
 
+function Usagedetails({ response }) {
+  return (
+    <div className="w-full p-6 bg-white">
+      <h2 className="text-2xl font-bold mb-4">Usage Details</h2>
+      <div className="text-left mx-auto p-6 br-sh rounded-lg bg-white">
+        <div className="text-left">
+          <p className="text-md md:text-lg font-semibold">
+            Model: {response.model}
+          </p>
+          {response.usage.total_time ? (
+            <p className="text-md md:text-lg font-semibold">
+              Total Time: {response.usage.total_time.toFixed(2)} seconds
+            </p>
+          ) : (
+            ""
+          )}
+          <p className="text-md md:text-lg font-semibold md:flex md:items-center md:gap-2">
+            Total Tokens: {response.usage.total_tokens} tokens
+            <br></br>
+            <span className="text-sm text-gray-600 md:text-lg">
+              Prompt: {response.usage.prompt_tokens} tokens
+            </span>
+            <br></br>
+            <span className="text-sm text-gray-600 md:text-lg">
+              Completion: {response.usage.completion_tokens} tokens
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UserProfile({ userData }) {
   return (
     <div className="">
@@ -721,18 +755,17 @@ function Playground() {
   const [selectedModel, setSelectedModel] = useState("llama3-70b-8192");
   const [activeForm, setActiveForm] = useState("form-1");
   const [apiResponse, setApiResponse] = useState("");
-  const [characterCount, setCharacterCount] = useState(0);
-  const [tokenCount, setTokenCount] = useState(0);
+  const [completeresponse, setCompleteResponse] = useState("");
   const [inputprompt, setInputPrompt] = useState("");
   const [titletosave, setTitleToSave] = useState("");
-  const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+  const [characterCount, setCharacterCount] = useState(0);
+  const [formInputs, setFormInputs] = useState({});
 
   const handleInputChange = (event) => {
-    setCharacterCount(event.target.value.length);
-    const text = event.target.value;
-    setInputPrompt(text);
-    const estimatedTokenCount = tokenizer.estimateTokenCount(text);
-    setTokenCount(estimatedTokenCount);
+    const { name, value } = event.target;
+    setFormInputs({ ...formInputs, [name]: value });
+    setCharacterCount(value.length);
+    setInputPrompt(value);
   };
 
   useEffect(() => {
@@ -817,6 +850,7 @@ function Playground() {
       });
       const data = await response.json();
       console.log(data);
+      setCompleteResponse(data);
       const messageContent = data.choices[0].message.content;
       setApiResponse(messageContent);
     } catch (error) {
@@ -931,7 +965,7 @@ function Playground() {
                   handleFormSubmit={handleFormSubmit}
                   templates={NEW_TEMPLATES}
                   characterCount={characterCount}
-                  tokenCount={tokenCount}
+                  inputPrompt={inputprompt}
                 />
                 <div className="w-full md:p-6">
                   {smallloading ? (
@@ -943,20 +977,22 @@ function Playground() {
                       {apiResponse ? (
                         <div className="flex flex-col justify-center items-center">
                           <AIResponse response={apiResponse} />
-                          <input
-                            type="text"
-                            value={titletosave}
-                            onChange={(e) => setTitleToSave(e.target.value)}
-                            placeholder="Title to save the response"
-                            className="mt-4 block border-2 border-gray-300 rounded-lg py-2 px-1 focus:ring-blue-500 focus:border-blue-500 max-w-56"
-                          />
-
-                          <button
-                            onClick={handleSaveResponse}
-                            className="mt-2 mb-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                          >
-                            Save Response
-                          </button>
+                          <div className="flex justify-center items-center flex-col md:flex-row gap-4">
+                            <input
+                              type="text"
+                              value={titletosave}
+                              onChange={(e) => setTitleToSave(e.target.value)}
+                              placeholder="Title to save the response"
+                              className="mt-4 block border-2 border-gray-300 rounded-lg py-2 px-1 focus:ring-blue-500 focus:border-blue-500 max-w-56 md:mt-0"
+                            />
+                            <button
+                              onClick={handleSaveResponse}
+                              className="mt-2 mb-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded md:m-0"
+                            >
+                              Save Response
+                            </button>
+                          </div>
+                          <Usagedetails response={completeresponse} />
                         </div>
                       ) : (
                         <div className="mt-4 text-gray-500">

@@ -10,6 +10,7 @@ import Events from "./pages/events";
 import Playground from "./pages/playground.jsx";
 import History from "./pages/history";
 import Store from "./pages/store";
+import About from "./pages/about";
 
 function Apps() {
   return (
@@ -21,6 +22,7 @@ function Apps() {
         <Route path="playground" element={<Playground />} />
         <Route path="history" element={<History />} />
         <Route path="store" element={<Store />} />
+        <Route path="about" element={<About />} />
       </Routes>
     </BrowserRouter>
   );

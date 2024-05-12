@@ -54,6 +54,7 @@ function LoadingButton() {
 }
 
 function UserProfile({ user }) {
+  console.log("User:", user);
   return (
     <div className="flex flex-col items-center gap-y-2">
       <p>Welcome, {user.displayName}!</p>
@@ -107,29 +108,23 @@ function EmailSignInForm({ onLogin }) {
     }
   };
 
+  const handleDummySignIn = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, "shravan@gmail.com", "90099009");
+      onLogin();
+    } catch (error) {
+      console.error("Dummy sign-in error:", error);
+      toast.error(`Error during dummy sign-in: ${error.message}`);
+    }
+  };
+
   return (
-    <form onSubmit={handleSignIn} className="flex flex-col items-center gap-y-2">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="px-4 py-2 border border-gray-300 rounded-md"
-      />
-      <button
-        type="submit"
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
-      >
-        Sign In
-      </button>
-    </form>
+    <button
+      onClick={handleDummySignIn}
+      className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+    >
+      Sign In to Test
+    </button>
   );
 }
 
