@@ -202,9 +202,9 @@ const Profile = () => {
     <div className="bg-white h-screen">
       <Header />
       <div className="flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-10 pt-14">
+        {/* <h1 className="text-4xl font-bold text-gray-800 mb-10 pt-14">
           Profile
-        </h1>
+        </h1> */}
         <ToastContainer
           position="top-center"
           autoClose="5000"

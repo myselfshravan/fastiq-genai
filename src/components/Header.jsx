@@ -20,7 +20,7 @@ function Header() {
     // absolute was removed
     <header className="inset-x-0 top-0 z-50 bg-white">
       <nav
-        className="flex items-center justify-between p-6 lg:px-8"
+        className="flex items-center justify-between p-2 lg:px-8"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
@@ -32,7 +32,7 @@ function Header() {
             />
           </a>
         </div>
-        <div className="flex lg:hidden">
+        <div className="flex lg:hidden p-6">
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
