@@ -148,11 +148,35 @@ function AIResponse({ response }) {
     /<code>/g,
     '<code class="language-python">'
   );
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="w-full bg-white">
-      <div className="text-left mx-auto p-6 br-sh rounded-lg bg-white">
-        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      <div className="text-left mx-auto p-2 br-sh rounded-lg bg-white">
+        <button onClick={() => setIsOpen(!isOpen)} className="text-left w-full">
+          <div className="flex justify-between items-center">
+            <h2 className="text-md md:text-xl font-semibold text-gray-900">
+              AI Response
+            </h2>
+            <span className="text-gray-500">{isOpen ? "▲" : "▼"}</span>
+          </div>
+        </button>
+        <Transition
+          show={isOpen}
+          enter="transition-opacity duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="mt-2">
+            <div
+              className="text-sm text-gray-700"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          </div>
+        </Transition>
       </div>
     </div>
   );
